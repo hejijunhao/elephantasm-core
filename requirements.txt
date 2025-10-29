@@ -1,0 +1,39 @@
+# FastAPI and server
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# Pydantic for data validation
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# Database
+sqlalchemy[asyncio]==2.0.35
+sqlmodel==0.0.22
+alembic==1.13.3
+psycopg[binary]==3.2.3  # Async PostgreSQL driver (pgBouncer-compatible)
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.17
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.1  # For testing async endpoints
+
+# Development tools
+python-dotenv==1.0.1
+
+# LangGraph workflow orchestration
+langgraph==0.2.45
+langgraph-checkpoint-postgres==2.0.6
+tenacity==9.0.0
+apscheduler==3.10.4
+
+# LLM providers
+anthropic==0.39.0
+openai==1.54.5
+
+# Structured logging
+structlog==24.4.0
