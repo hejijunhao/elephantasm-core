@@ -1,0 +1,148 @@
+"""Domain operations for Identity entity."""
+
+from datetime import datetime
+from typing import Optional
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+from sqlmodel import select
+
+from app.models.database.identity import (
+    Identity,
+    IdentityCreate,
+    IdentityUpdate,
+    IdentityAssessment,
+)
+
+
+class IdentityOperations:
+    """Domain operations for Identity entity (1:1 with Anima)."""
+
+    @staticmethod
+    def create(
+        session: Session,
+        anima_id: UUID,
+        data: IdentityCreate
+    ) -> Identity:
+        """Create Identity for an Anima."""
+        identity = Identity(
+            anima_id=anima_id,
+            **data.model_dump(exclude_unset=True)
+        )
+        session.add(identity)
+        session.flush()
+        session.refresh(identity)
+        return identity
+
+    @staticmethod
+    def get_by_id(
+        session: Session,
+        identity_id: UUID,
+        include_deleted: bool = False
+    ) -> Optional[Identity]:
+        """Get Identity by ID."""
+        stmt = select(Identity).where(Identity.id == identity_id)
+        if not include_deleted:
+            stmt = stmt.where(Identity.is_deleted == False)
+        return session.exec(stmt).first()
+
+    @staticmethod
+    def get_by_anima_id(
+        session: Session,
+        anima_id: UUID,
+        include_deleted: bool = False
+    ) -> Optional[Identity]:
+        """Get Identity by Anima ID (1:1 relationship)."""
+        stmt = select(Identity).where(Identity.anima_id == anima_id)
+        if not include_deleted:
+            stmt = stmt.where(Identity.is_deleted == False)
+        return session.exec(stmt).first()
+
+    @staticmethod
+    def update(
+        session: Session,
+        identity_id: UUID,
+        data: IdentityUpdate
+    ) -> Identity:
+        """Update Identity entry."""
+        identity = IdentityOperations.get_by_id(session, identity_id)
+        if not identity:
+            raise ValueError(f"Identity {identity_id} not found")
+
+        update_data = data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(identity, key, value)
+
+        identity.updated_at = datetime.utcnow()
+        session.add(identity)
+        session.flush()
+        session.refresh(identity)
+        return identity
+
+    @staticmethod
+    def assess(
+        session: Session,
+        identity_id: UUID,
+        assessment: IdentityAssessment
+    ) -> Identity:
+        """
+        Apply personality assessment to Identity.
+
+        Updates personality_type, spectrums, confidence, and increments assessment_count.
+        """
+        identity = IdentityOperations.get_by_id(session, identity_id)
+        if not identity:
+            raise ValueError(f"Identity {identity_id} not found")
+
+        # Apply assessment
+        identity.personality_type = assessment.personality_type
+        identity.energy_spectrum = assessment.spectrums.get("energy")
+        identity.information_spectrum = assessment.spectrums.get("information")
+        identity.decision_spectrum = assessment.spectrums.get("decision")
+        identity.lifestyle_spectrum = assessment.spectrums.get("lifestyle")
+        identity.confidence = assessment.confidence
+        identity.last_assessed_at = datetime.utcnow()
+        identity.assessment_count += 1
+        identity.updated_at = datetime.utcnow()
+
+        session.add(identity)
+        session.flush()
+        session.refresh(identity)
+        return identity
+
+    @staticmethod
+    def soft_delete(session: Session, identity_id: UUID) -> Identity:
+        """Soft delete Identity."""
+        identity = IdentityOperations.get_by_id(session, identity_id)
+        if not identity:
+            raise ValueError(f"Identity {identity_id} not found")
+
+        identity.is_deleted = True
+        identity.updated_at = datetime.utcnow()
+        session.add(identity)
+        session.flush()
+        session.refresh(identity)
+        return identity
+
+    @staticmethod
+    def restore(session: Session, identity_id: UUID) -> Identity:
+        """Restore soft-deleted Identity."""
+        identity = IdentityOperations.get_by_id(session, identity_id, include_deleted=True)
+        if not identity:
+            raise ValueError(f"Identity {identity_id} not found")
+
+        identity.is_deleted = False
+        identity.updated_at = datetime.utcnow()
+        session.add(identity)
+        session.flush()
+        session.refresh(identity)
+        return identity
+
+    @staticmethod
+    def exists_for_anima(session: Session, anima_id: UUID) -> bool:
+        """Check if Identity exists for an Anima."""
+        stmt = select(Identity.id).where(
+            Identity.anima_id == anima_id,
+            Identity.is_deleted == False
+        )
+        return session.exec(stmt).first() is not None
