@@ -1,0 +1,125 @@
+# ============================================
+# Elephantasm Backend - Docker Build Exclusions
+# ============================================
+# Exclude unnecessary files from Docker build context
+# Reduces build time and image size
+# ============================================
+
+# ============================================
+# Version Control
+# ============================================
+.git
+.gitignore
+.gitattributes
+
+# ============================================
+# Virtual Environments
+# ============================================
+.venv
+venv/
+env/
+ENV/
+.virtualenv
+
+# ============================================
+# Python Cache & Bytecode
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ============================================
+# Environment Files (NEVER include in Docker!)
+# ============================================
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+!.env.example
+
+# ============================================
+# Database Files
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+log/
+
+# ============================================
+# IDE & Editor Files
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Test Coverage
+# ============================================
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# ============================================
+# Documentation
+# ============================================
+docs/
+*.md
+!README.md
+
+# ============================================
+# Fly.io Configuration
+# ============================================
+# fly.toml is used separately by Fly.io CLI
+# Don't include in Docker build
+fly.toml
+fly.*.toml
+
+# ============================================
+# Development & Testing
+# ============================================
+tests/
+test/
+.pytest_cache/
+.tox/
+
+# ============================================
+# Build Artifacts
+# ============================================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ============================================
+# Alembic (migrations handled separately)
+# ============================================
+# Note: migrations/ folder IS included in build
+# Only exclude local alembic config overrides
+alembic.ini.local
