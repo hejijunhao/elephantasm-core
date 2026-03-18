@@ -23,6 +23,13 @@ SDK_ALLOWED_PATTERNS = [
     r"^/api/animas/[^/]+$",
     r"^/api/animas/[^/]+/memory-packs/latest$",
     r"^/api/subscriptions/usage$",
+    # Tier 1: Agent retrieval endpoints
+    r"^/api/memories/search/semantic$",
+    r"^/api/knowledge/search/semantic$",
+    r"^/api/knowledge/type/[^/]+$",
+    r"^/api/identities/anima/[^/]+$",
+    # Tier 2: Unified query endpoint
+    r"^/api/query$",
 ]
 
 # Compile patterns for performance
